@@ -1,0 +1,56 @@
+servingEngineSpec:
+  runtimeClassName: "nvidia"
+  modelSpec:
+  - name: "gemma3"
+    repository: "vllm/vllm-openai"
+    tag: "latest"
+
+    modelURL: "google/gemma-3-270m-it"
+    replicaCount: 1
+
+    requestCPU: 4
+    requestMemory: "64Gi"
+    limitCPU: 10
+    limitMemory: "100Gi"
+    requestGPU: 1
+
+    shmSize: "2Gi"
+
+    pvcStorage: "100Gi"
+    pvcAccessMode:
+      - ReadWriteOnce
+    pvcMatchLabels:
+      model: "gemma3-pv"
+
+    vllmConfig:
+      maxModelLen: 1024
+      gpuMemoryUtilization: 0.8
+      enableChunkedPrefill: true
+      extraArgs: ["--trust-remote-code", "--enforce-eager"]
+
+    hf_token:
+      secretName: "hf-token-secret"
+      secretKey: "token" 
+
+    startupProbe:
+    initialDelaySeconds: 30
+    periodSeconds: 30
+    failureThreshold: 30
+    timeoutSeconds: 10
+    httpGet:
+      path: /health
+      port: 8000
+routerSpec:
+  startupProbe:
+    initialDelaySeconds: 15  # 시작 전 대기 시간 상향
+    periodSeconds: 10       # 체크 간격 상향
+    failureThreshold: 60    # 실패 허용 횟수 대폭 상향 (60 * 10 = 10분 대기)
+    httpGet:
+      path: /health
+  resources:
+    requests:
+      cpu: 400m
+      memory: 1Gi
+    limits:
+      cpu: 1000m
+      memory: 2Gi
