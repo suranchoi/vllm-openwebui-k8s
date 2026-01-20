@@ -16,11 +16,8 @@ servingEngineSpec:
 
     shmSize: "2Gi"
 
-    pvcStorage: "100Gi"
     pvcAccessMode:
       - ReadWriteOnce
-    pvcMatchLabels:
-      model: "gemma3-pv"
 
     vllmConfig:
       maxModelLen: 1024
