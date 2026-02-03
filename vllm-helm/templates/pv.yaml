@@ -1,0 +1,35 @@
+{{- if .Values.servingEngineSpec.enableEngine -}}
+{{- range $modelSpec := .Values.servingEngineSpec.modelSpec }}
+{{- with $ -}}
+{{- if hasKey $modelSpec "localPath" }}
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: "{{ $modelSpec.volumeName }}"
+  labels:
+    app: {{ $.Release.Name }}
+spec:
+  capacity:
+    storage: {{ $modelSpec.pvcStorage | default "500Gi" }}
+  accessModes:
+    {{- if $modelSpec.pvcAccessMode }}
+    {{- toYaml $modelSpec.pvcAccessMode | nindent 4 }}
+    {{- else }}
+    - ReadOnlyMany
+    {{- end }}
+  persistentVolumeReclaimPolicy: Retain
+  local:
+    path: {{ $modelSpec.localPath }}
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - {{ $modelSpec.nodeHostname }}
+{{- end }}
+{{- end }}
+---
+{{- end }}
+{{- end }}

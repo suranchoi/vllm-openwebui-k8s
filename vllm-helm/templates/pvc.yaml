@@ -1,4 +1,3 @@
-
 {{- if .Values.servingEngineSpec.enableEngine -}}
 {{- range $modelSpec := .Values.servingEngineSpec.modelSpec }}
 {{- with $ -}}
@@ -21,9 +20,14 @@ spec:
     {{- end }}
   resources:
     requests:
-      storage: {{ $modelSpec.pvcStorage | default "20Gi" }}  # Default to 20Gi if not set
+      storage: {{ $modelSpec.pvcStorage | default "20Gi" }}
   {{- if hasKey $modelSpec "storageClass" }}
   storageClassName: "{{ $modelSpec.storageClass }}"
+  {{- else if hasKey $modelSpec "volumeName" }}
+  storageClassName: ""  # static binding
+  {{- end }}
+  {{- if hasKey $modelSpec "volumeName" }}
+  volumeName: "{{ $modelSpec.volumeName }}"
   {{- end }}
   {{- if not (empty $modelSpec.pvcMatchLabels) }}
   selector:

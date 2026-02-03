@@ -1,13 +1,20 @@
 servingEngineSpec:
   runtimeClassName: "nvidia"
+  enableEngine: true
   modelSpec:
   - name: "gemma3"
     repository: "vllm/vllm-openai"
     tag: "latest"
 
-    modelURL: "google/gemma-3-270m-it"
+    modelURL: "/data/gemma-3-270m-it"
     replicaCount: 1
 
+    pvcStorage: "500Gi"
+    pvcAccessMode:
+      - ReadOnlyMany
+    localPath: "/data2/huggingface/hub"  
+    nodeHostname: "h100-server" 
+ 
     requestCPU: 4
     requestMemory: "64Gi"
     limitCPU: 10
